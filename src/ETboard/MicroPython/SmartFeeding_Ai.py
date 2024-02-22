@@ -1,10 +1,20 @@
-# import
+# *****************************************************************************************
+# FileName     : SmartFeeding_Ai
+# Description  : 스마트 팩토리 코딩 키트 (기본)
+# Author       : 박은정
+# CopyRight    : (주)한국공학기술연구원(www.ketri.re.kr)
+# Created Date : 2024.02.22
+# Reference    :
+# Modified     : 
+# *****************************************************************************************
+
+# import                         
 import time
 import sys
 from machine import UART, Pin, PWM
 from ETboard.lib.pin_define import *
 from ETboard.lib.OLED_U8G2 import *
-
+from common import *
 
 # global variable
 led_red = Pin(D2)                         # 빨강 LED 핀 지정
@@ -31,7 +41,7 @@ count = 0                                 # 모이 공급 횟수
 class_id = 3
 class_names = ['dog', 'chicken', 'giraffe', 'none']
 
-uart = UART(1)              # 시리얼 통신 포트 지정
+uart = UART(1)                            # 시리얼 통신 포트 지정
 
 # setup
 def setup():
@@ -43,16 +53,15 @@ def setup():
     button_blue.init(Pin.IN)              # 파랑 버튼 입력모드 설정
     button_green.init(Pin.IN)             # 초록 버튼 입력모드 설정
     
-    uart.init(baudrate=115200,            # 시리얼 통신 속도 지정
-              timeout=1000,               # 최대 1초만 수신 대기
-              tx=1, rx=3)                 # 이티보드 통신 핀 번호 지정
+    serial_init(uart)                     # USB 시리얼 통신 설정
 
 
 # main loop
 def loop():
     global class_id, mode, mode_str, pre_time, now_time, count, last_supply_time
 
-    receive()                            # PC에서 보낸 시리얼 통신을 읽어오는 함수 호출
+    #receive()                            # PC에서 보낸 시리얼 통신을 읽어오는 함수 호출
+    receive_msg()
 
     button_blue_status = button_blue.value()
     button_green_status = button_green.value()
@@ -133,19 +142,7 @@ def supply():
     last_supply_time = "{:02d}/{:02d}/{:02d} {:02d}:{:02d}".format(now[0], now[1], now[2], now[3], now[4])
 
 
-# receive
-def receive():
-    global class_id
 
-    msg = uart.readline()             # 메시지를 1줄씩 읽음
-    if msg is None:                   # 어떤 메시지도 받지 못하면
-        led_yellow.value(HIGH)        # 노랑 LED 깜밖임
-        time.sleep(0.5)      
-        led_yellow.value(LOW)      
-        time.sleep(0.5)      
-        return
-
-    class_id = int(msg.rstrip())
 
 
 # start point
